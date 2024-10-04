@@ -1,0 +1,28 @@
+#!/bin/sh
+# Copyright 2024 The Wazo Authors  (see the AUTHORS file)
+# SPDX-License-Identifier: GPL-3.0+
+
+case "$1" in
+    build)
+        ;;
+
+    package)
+        mkdir -p "${pkgdir}/usr/share/wazo-calld-globalvars"
+        cp wazo-calld-globalvars.patch "${pkgdir}/usr/share/wazo-calld-globalvars/wazo-calld-globalvars.patch"
+        ;;
+
+    install)
+        patch --verbose --reject-file - -p1 -d /usr/lib/python3/dist-packages/ < /usr/share/wazo-calld-globalvars/wazo-calld-globalvars.patch
+        systemctl restart wazo-calld
+        ;;
+
+    uninstall)
+        patch --verbose -p1 -R -d /usr/lib/python3/dist-packages/ < /usr/share/wazo-calld-globalvars/wazo-calld-globalvars.patch || true
+        systemctl restart wazo-calld
+        ;;
+
+    *)
+        echo "$0 called with unknown argument '$1'" >&2
+        exit 1
+    ;;
+esac
